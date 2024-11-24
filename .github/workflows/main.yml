@@ -8,8 +8,8 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: hdfc-test-frontend
-  ECS_SERVICE: hdfc-test-frontend-cluster
-  ECS_CLUSTER: hdfc-test-frontend-service
+  ECS_SERVICE: hdfc-test-frontend-service
+  ECS_CLUSTER: hdfc-test-frontend-cluster
 
 jobs:
   deploy:
