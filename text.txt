@@ -1,0 +1,3 @@
+npm init
+npm i express dotenv express-handlebars body-parser mysql 
+npm install --save-dev nodemon
