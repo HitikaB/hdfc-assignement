@@ -49,4 +49,4 @@ jobs:
 
       - name: Deploy to ECS
         run: |
-          aws deploy create-deployment --application-name ${{ env.APP_DEPLOY_NAME }} --deployment-group-name ${{ env.CODE_DEPLOY_NAME }} --deployment-config-name CodeDeployDefault.ECSAllAtOnce --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+          aws deploy create-deployment --application-name ${{ env.APP_DEPLOY_NAME }} --deployment-group-name ${{ env.CODE_DEPLOY_NAME }} --deployment-config-name CodeDeployDefault.ECSAllAtOnce
