@@ -49,4 +49,4 @@ jobs:
 
       - name: Deploy to ECS
         run: |
-          aws deploy update-deployment-group --application-name $APP_DEPLOY_NAME --current-deployment-group-name $CODE_DEPLOY_NAME --ecs-services $ECS_SERVICE
+          aws deploy update-deployment-group --application-name $APP_DEPLOY_NAME --current-deployment-group-name $CODE_DEPLOY_NAME --ecs-services $ECS_SERVICE --deployment-config-name CodeDeployDefault.ECSAllAtOnce 
