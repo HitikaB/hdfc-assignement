@@ -47,6 +47,10 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Deploy to ECS
+      - name: Create CodeDeploy Deployment
         run: |
-          aws deploy update-deployment-group --application-name $APP_DEPLOY_NAME --current-deployment-group-name $CODE_DEPLOY_NAME --deployment-config-name CodeDeployDefault.ECSAllAtOnce 
+          aws deploy create-deployment \
+            --application-name $APP_DEPLOY_NAME \
+            --deployment-group-name $CODE_DEPLOY_NAME \
+            --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
