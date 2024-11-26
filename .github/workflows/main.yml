@@ -50,7 +50,8 @@ jobs:
       - name: Create CodeDeploy Deployment
         run: |
           echo "[*] Deploy Start"
-          aws s3 cp appspec.yaml s3://terraform-tfstate-hdfc/appspec.yaml
+          ls
+          aws s3 cp /hdfc-assignement/appspec.yaml s3://terraform-tfstate-hdfc/appspec.yaml
           echo "[*] Upload appspec.yaml to S3 Done"
           sleep 3
           aws deploy \
