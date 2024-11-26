@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "Resources": [
+    {
+      "TargetService": {
+        "Type": "AWS::ECS::Service",
+        "Properties": {
+          "TaskDefinition": "arn:aws:ecs:us-east-1:339712975105:task-definition/hdfc-test-frontend-task:6",
+          "LoadBalancerInfo": {
+            "ContainerName": "frontend",
+            "ContainerPort": 3000
+          }
+        }
+      }
+    }
+  ]
+}
