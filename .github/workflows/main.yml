@@ -55,14 +55,4 @@ jobs:
 
       - name: Create CodeDeploy Deployment
         run: |
-          echo "[*] Deploy Start"
-          ls
-          aws s3 cp appspec.yml s3://terraform-tfstate-hdfc/appspec.yaml
-          echo "[*] Upload appspec.yaml to S3 Done"
-          sleep 3
-          aws deploy \
-          create-deployment \
-          --application-name $APP_DEPLOY_NAME \
-          --deployment-group-name $CODE_DEPLOY_NAME \
-          --s3-location bucket=terraform-tfstate-hdfc,bundleType=yaml,key=appspec.yaml
-          echo "[*] Deploy Done"
+          aws ecs update-service --service $ECS_SERVICE --cluster $ECS_CLUSTER --deployment-configuration "deploymentCircuitBreaker={enable=true,rollback=true}" --deployment-controller type=CODE_DEPLOY
