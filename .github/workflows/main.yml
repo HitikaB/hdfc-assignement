@@ -49,8 +49,13 @@ jobs:
 
       - name: Create CodeDeploy Deployment
         run: |
-          aws deploy create-deployment \
-            --application-name $APP_DEPLOY_NAME \
-            --deployment-group-name $CODE_DEPLOY_NAME \
-            --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+          echo "[*] Deploy Start"
+          aws s3 cp appspec.yaml s3://terraform-tfstate-hdfc/appspec.yaml
+          echo "[*] Upload appspec.yaml to S3 Done"
+          sleep 3
+          aws deploy \
+          create-deployment \
+          --application-name $APP_DEPLOY_NAME \
+          --deployment-group-name $CODE_DEPLOY_NAME \
+          --s3-location bucket=terraform-tfstate-hdfc,bundleType=yaml,key=appspec.yaml
+          echo "[*] Deploy Done"
