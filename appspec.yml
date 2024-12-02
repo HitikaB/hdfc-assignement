@@ -5,7 +5,7 @@
       "TargetService": {
         "Type": "AWS::ECS::Service",
         "Properties": {
-          "TaskDefinition": "arn:aws:ecs:us-east-1:339712975105:task-definition/hdfc-test-frontend-task:6",
+          "TaskDefinition": "arn:aws:ecs:us-east-1:339712975105:task-definition/hdfc-test-frontend-task",
           "LoadBalancerInfo": {
             "ContainerName": "frontend",
             "ContainerPort": 3000
