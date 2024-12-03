@@ -1,9 +1,13 @@
 name: Deploy to Amazon ECS
 
+# Enable manual trigger
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch: # Manual trigger event
+    inputs:
+      environment:
+        description: "Environment to deploy (e.g., dev, prod)"
+        required: true
+        default: "development"
 
 env:
   AWS_REGION: us-east-1
@@ -17,20 +21,22 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: development
+    environment: ${{ github.event.inputs.environment }}
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
+          fetch-depth: 0
+
+      - name: Run SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -38,31 +44,27 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build, Tag, and Push Docker Image to ECR
         id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: latest
         run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
-      - name: Create CodeDeploy Deployment
+      - name: Update ECS Service
         run: |
-          echo "[*] Deploy Start"
-          ls
-          aws s3 cp appspec.yml s3://terraform-tfstate-hdfc/appspec.yaml
-          echo "[*] Upload appspec.yaml to S3 Done"
-          sleep 3
-          aws deploy \
-          create-deployment \
-          --application-name $APP_DEPLOY_NAME \
-          --deployment-group-name $CODE_DEPLOY_NAME \
-          --s3-location bucket=terraform-tfstate-hdfc,bundleType=yaml,key=appspec.yaml
-          echo "[*] Deploy Done"
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
+
+      - name: Notify Success
+        if: success()
+        run: echo "Deployment successful!"
+
+      - name: Notify Failure
+        if: failure()
+        run: echo "Deployment failed. Check logs."
